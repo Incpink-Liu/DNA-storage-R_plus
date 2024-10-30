@@ -25,9 +25,9 @@
 ***
     ├── examples                          // Test module
     │    ├── files                        // Test files
-    │    │    ├── Mona Lisa.jpg           // Mona Lisa.jpg
+    │    │    ├── Mona Lisa.bmp           // Mona Lisa.bmp
     │    ├── output                       // Generated files from pipeline
-    │    ├── test_mona_lisa.py            // Run R+ using Mona Lisa.jpg
+    │    ├── Mona_lisa_test.py            // Run R+ using Mona Lisa.bmp
     ├── R+
     │    ├── utils                        // Util module
     │    │    ├── log.py                  // Output the logs in console
