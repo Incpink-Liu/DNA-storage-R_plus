@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name="R_plus",
-    version="0.1",
+    version="0.1.0",
     author="Incpink Liu, Zhi Ping",
     author_email="liuderuilin@genomics.cn, liuderuilin22@mails.ucas.ac.cn",
     maintainer="BGI-research",
