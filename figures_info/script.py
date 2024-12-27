@@ -515,9 +515,111 @@ def annotate_heatmap(
     return texts
 
 
+def supplementary_figure_3():
+    file_names = ["Goldman.pdf", "poem.txt", "program.py", "rain.wav", "speak.mp4", "sunflower.bmp"]
+    file_sizes = [os.path.getsize(f"../test_files/for_simulation_evaluation/{file_name}") for file_name in file_names]
+
+    GC_xmax_xmin = []
+    for case in os.scandir(r"./input_data/FigureS3/GC_content"):
+        csv_data = pd.read_csv(case.path)
+        GC_xmax_xmin.append(csv_data["GC content"].multiply(100).max() - csv_data["GC content"].multiply(100).min())
+
+    homopolymer_max_len = pd.read_excel(r"./input_data/FigureS3/Homopolymer/homopolymer_length.xlsx").values[1][1:]
+
+    all_data = sorted(list(zip(file_names, file_sizes, GC_xmax_xmin, homopolymer_max_len)), key=lambda x: x[1])
+    sorted_file_names = [data[0] for data in all_data]
+    sorted_file_sizes = [data[1] for data in all_data]
+    sorted_GC_xmax_xmin = [data[2] for data in all_data]
+    sorted_homopolymer_max_len = [data[3] for data in all_data]
+
+    palette = sns.color_palette("Set2")
+    c = [palette[1], palette[2], palette[0], palette[4], palette[3], palette[5]]
+
+    figure, (ax_1, ax_2) = plt.subplots(2, 1, figsize=(6, 12))
+
+    m_GC, b_GC = np.polyfit(np.log10(sorted_file_sizes), sorted_GC_xmax_xmin, 1)
+    m_homopolymer, b_homopolymer = np.polyfit(np.log10(sorted_file_sizes), sorted_homopolymer_max_len, 1)
+    file_size_fit = np.linspace(min(sorted_file_sizes), max(sorted_file_sizes), 100)
+    GC_fit = m_GC * np.log10(file_size_fit) + b_GC
+    homopolymer_fit = m_homopolymer * np.log10(file_size_fit) + b_homopolymer
+
+    ax_1.set_xscale("log")
+    for i in range(len(sorted_file_names)):
+        ax_1.scatter(sorted_file_sizes[i], sorted_GC_xmax_xmin[i], marker="o", color=c[i], s=150)
+    ax_1.set_xticks([1000, 10000, 100000, 1000000], labels=["1 KB", "10 KB", "100 KB", "1 MB"], rotation=15)
+    ax_1.plot(file_size_fit, GC_fit, color="black", linestyle="--")
+    ax_1.set_xlabel("File size")
+    ax_1.set_ylabel("% Range of GC content")
+    ax_1.legend(loc="upper left", labels=sorted_file_names)
+    ax_1.text(-0.15, 1.05, "(A)", ha="left", va="top", transform=ax_1.transAxes)
+
+    ax_2.set_xscale("log")
+    for j in range(len(sorted_file_names)):
+        ax_2.scatter(sorted_file_sizes[j], sorted_homopolymer_max_len[j], marker="^", color=c[j], s=150)
+    ax_2.set_xticks([1000, 10000, 100000, 1000000], labels=["1 KB", "10 KB", "100 KB", "1 MB"], rotation=15)
+    ax_2.plot(file_size_fit, homopolymer_fit, color="black", linestyle="-.")
+    ax_2.set_xlabel("File size")
+    ax_2.set_ylabel("Max length of homopolymer / nt")
+    ax_2.legend(loc="upper left", labels=sorted_file_names)
+    ax_1.text(-0.15, 1.05, "(B)", ha="left", va="top", transform=ax_2.transAxes)
+
+    figs3_path = "./generated_figure/FigureS3.svg"
+    plt.savefig(figs3_path)
+    plt.show()
+
+
+def supplementary_figure_6():
+    loc_error_without_sub, loc_error_without_ins, loc_error_without_del, without_errors = [], [], [], []
+    data_path = r"input_data/FigureS6/errors_location_record.xlsx"
+    wb = openpyxl.load_workbook(data_path)
+    ws_without_sub = wb["without_ref_sub"]
+    ws_without_ins = wb["without_ref_ins"]
+    ws_without_del = wb["without_ref_del"]
+
+    for col in range(2, 102):
+        summation_without_sub, summation_without_ins, summation_without_del, no_errors = 0, 0, 0, 0
+        for row in range(2, 407):
+            summation_without_sub += ws_without_sub.cell(row, col).value
+            summation_without_ins += ws_without_ins.cell(row, col).value
+            summation_without_del += ws_without_del.cell(row, col).value
+        total = summation_without_sub + summation_without_ins + summation_without_del
+        if total != 0:
+            sub_ratio = (summation_without_sub / total) * 100
+            ins_ratio = (summation_without_ins / total) * 100
+            del_ratio = 100 - sub_ratio - ins_ratio
+        else:
+            sub_ratio, ins_ratio, del_ratio = 0, 0, 0
+            no_errors = 100
+
+        loc_error_without_sub.append(sub_ratio)
+        loc_error_without_ins.append(ins_ratio)
+        loc_error_without_del.append(del_ratio)
+        without_errors.append(no_errors)
+
+    data_A = [loc_error_without_sub[: 50], loc_error_without_del[: 50], loc_error_without_ins[: 50], without_errors[: 50]]
+    data_B = [loc_error_without_sub[50:], loc_error_without_del[50:], loc_error_without_ins[50:], without_errors[50:]]
+
+    gs = gridspec.GridSpec(40, 20)
+    ax_1 = plt.subplot(gs[: 18, : 20])
+    ax_2 = plt.subplot(gs[22: 40, : 20])
+
+    ax_1.tick_params(direction="out", bottom=True, left=True)
+
+    color = [sns.color_palette()[-1], sns.color_palette()[-2], sns.color_palette()[-3], sns.color_palette()[0]]
+
+    for d in range(len(data_A)):
+        ax_1.bar(list(range(1, 51)), data_A[d], bottom=np.sum(data_A[:d], axis=0), color=color[d], width=0.5, edgecolor="black")
+        ax_2.bar(list(range(51, 101)), data_B[d], bottom=np.sum(data_B[:d], axis=0), color=color[d], width=0.5, edgecolor="black")
+
+    ax_1.legend(ncols=4, loc="upper center", labels=["sub.", "del.", "ins.", "no_errors"], bbox_to_anchor=(0.5, 1.3), prop={"size": 10})
+    ax_1.set_ylabel("% Ratio", size=10)
+    ax_2.set_ylabel("% Ratio", size=10)
+    ax_2.set_xlabel("Base position in oligo", size=10)
+
+    figs5_path = "./generated_figure/FigureS6.svg"
+    plt.savefig(figs5_path)
+    plt.show()
+
+
 if __name__ == "__main__":
     pass
-    # figure_2()
-    # figure_3_without_subplot_A()
-    # supplementary_figure_1()
-    supplementary_figure_2()
