@@ -12,11 +12,13 @@ setup(
     author="Incpink Liu, Zhi Ping",
     author_email="liuderuilin@genomics.cn, liuderuilin22@mails.ucas.ac.cn",
     maintainer="BGI-research",
-    url="https:/github.com/incpink-Liu/DNA-storage-R+",
+    url="https:/github.com/incpink-Liu/DNA-storage-R_plus",
     description="R+ implementation",
-    long_description="R+ is a DNA storage transcoding strategy developed by BGI-research. "
+    long_description="R+ is a DNA storage transcoding strategy developed by BGI-research. \n"
                      "Briefly, it can provide a direct mapping refence between expanded molecular alphabet and "
-                     "N-nary digits in the absence of high-performance transcoding algorithm at present.",
+                     "N-nary digits in the absence of high-performance transcoding algorithm at present.\n"
+                     "To know more abour detailed information of the module, "
+                     "please click Github Repository link: https:/github.com/incpink-Liu/DNA-storage-R_plus",
     packages=["R_plus", "R_plus/utils"],
     classifiers=[
         "Intended Audience :: Science/Research",

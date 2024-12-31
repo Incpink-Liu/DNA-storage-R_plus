@@ -10,7 +10,6 @@ import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import openpyxl
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -43,14 +42,14 @@ def figure_2():
     data_A["GC content"] = data_A["GC content"].multiply(100)
 
     # Figure_2-B data.
-    data_B_path = "./input_data/Figure2B_Homopolymers/homopolymer_length.xlsx"
-    data_B = pd.read_excel(data_B_path)
+    data_B_path = "./input_data/Figure2B_Homopolymers/homopolymer_length.csv"
+    data_B = pd.read_csv(data_B_path)
     file_names = [file_name for file_name in data_B.columns[1:].tolist()]
 
     # Figure_2-C and figure_2-D data.
-    data_C_path = "./input_data/Figure2C_Average_recovery_rate/average_recovery_rate.xlsx"
-    data_D_path = "./input_data/Figure2D_Coefficient_variation/coefficient_variation.xlsx"
-    data_C, data_D = pd.read_excel(data_C_path), pd.read_excel(data_D_path)
+    data_C_path = "./input_data/Figure2C_Average_recovery_rate/average_recovery_rate.csv"
+    data_D_path = "./input_data/Figure2D_Coefficient_variation/coefficient_variation.csv"
+    data_C, data_D = pd.read_csv(data_C_path), pd.read_csv(data_D_path)
     avg_values = data_C.values[:, 1:].astype(np.float32)
     cov_values = data_D.values[:, 1:].astype(np.float32)
     error_rates = [float(error_rate[: -1]) for error_rate in data_D.columns[1:].tolist()]
@@ -145,21 +144,22 @@ def figure_3_without_subplot_A():
 
     # Figure_3-B & C data.
     sequence_groups = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"]
-    data_B_C_path = "./input_data/Figure3B&C_Error_count_record/errors_count_record.xlsx"
-    xlsx = openpyxl.load_workbook(data_B_C_path)
-    sheet = xlsx["Sheet1"]
 
     insertions_ratio, deletions_ratio, substitutions_ratio, CM_sub_ratio = [], [], [], []
     insertions_cnt, deletions_cnt, substitutions_cnt, CM_sub_cnt = [], [], [], []
 
-    for i in range(1, 31, 2):
-        ins_cnt = int(sheet[f"R{i * 3}"].value) + int(sheet[f"R{(i + 1) * 3 }"].value)
-        del_cnt = int(sheet[f"R{i * 3 + 1}"].value) + int(sheet[f"R{(i + 1) * 3 + 1}"].value)
-        sub_cnt = int(sheet[f"R{i * 3 + 2}"].value.split("/")[-1]) + int(sheet[f"R{(i + 1) * 3 + 2}"].value.split("/")[-1])
-        CM_cnt = int(sheet[f"R{i * 3 + 2}"].value.split("/")[0]) + int(sheet[f"R{(i + 1) * 3 + 2}"].value.split("/")[0])
+    with open(r".\input_data\Figure3B&C_Error_count_record\depth10.csv", "r", encoding="utf-8") as f_depth:
+        csv_reader = csv.reader(f_depth)
+        ws_depth = [row for row in csv_reader]
+
+    for i in range(0, 30, 2):
+        ins_cnt = int(ws_depth[i * 3][-1]) + int(ws_depth[(i + 1) * 3][-1])
+        del_cnt = int(ws_depth[i * 3 + 1][-1]) + int(ws_depth[(i + 1) * 3 + 1][-1])
+        sub_cnt = int(ws_depth[i * 3 + 2][-1].split("_")[-1]) + int(ws_depth[(i + 1) * 3 + 2][-1].split("_")[-1])
+        CM_cnt = int(ws_depth[i * 3 + 2][-1].split("_")[0]) + int(ws_depth[(i + 1) * 3 + 2][-1].split("_")[0])
         summary = ins_cnt + del_cnt + sub_cnt
 
-        sub_ratio = (sub_cnt/ summary) * 100
+        sub_ratio = (sub_cnt / summary) * 100
         ins_ratio = (ins_cnt / summary) * 100
         del_ratio = 100 - sub_ratio - ins_ratio
         CM_ratio = (CM_cnt / sub_cnt) * 100
@@ -175,11 +175,11 @@ def figure_3_without_subplot_A():
         CM_sub_cnt.append(CM_cnt)
 
     single_CM_ratio = []
-    for m in range(1, 31):
-        for n in [chr(x) for x in range(67, 82)]:
+    for m in range(0, 30):
+        for n in range(0, 15):
             try:
-                single_CM_cnt, single_sub_cnt = [int(y) for y in sheet[f"{n}{m * 3 + 2}"].value.split("/")]
-            except AttributeError:
+                single_CM_cnt, single_sub_cnt = [int(y) for y in ws_depth[m * 3 + 2][n].split("_")]
+            except ValueError:
                 break
             else:
                 single_CM_ratio.append((single_CM_cnt / single_sub_cnt) * 100) if single_sub_cnt != 0 else single_CM_ratio.append(0)
@@ -189,16 +189,19 @@ def figure_3_without_subplot_A():
 
     # Figure_3-D data.
     location_error_without, location_error_with = [], []
-    data_D_path = "./input_data/Figure3D_Error_location_record/errors_location_record.xlsx"
-    wb = openpyxl.load_workbook(data_D_path)
-    ws_without = wb["without_ref"]
-    ws_with = wb["with_ref"]
+    with open(r".\input_data\Figure3D_Error_location_record\with.csv") as f_with:
+        csv_reader = csv.reader(f_with)
+        ws_with = [list(map(int, row)) for row in csv_reader]
 
-    for col in range(2, 102):
+    with open(r".\input_data\Figure3D_Error_location_record\without.csv") as f_without:
+        csv_reader = csv.reader(f_without)
+        ws_without = [list(map(int, row)) for row in csv_reader]
+
+    for col in range(0, 100):
         summation_without, summation_with = 0, 0
-        for row in range(2, 407):
-            summation_without += ws_without.cell(row, col).value
-            summation_with += ws_with.cell(row, col).value
+        for row in range(0, 405):
+            summation_without += ws_without[row][col]
+            summation_with += ws_with[row][col]
         location_error_without.append((summation_without / 405) * 100)
         location_error_with.append((summation_with / 405) * 100)
 
@@ -322,8 +325,8 @@ def supplementary_figure_2():
 
     data_set = []
     for case in cases:
-        case_path = f"./input_data/FigureS2/{case}-recovery_rates.xlsx"
-        data = pd.read_excel(case_path)
+        case_path = f"./input_data/FigureS2/{case}-recovery_rates.csv"
+        data = pd.read_csv(case_path)
         recovery_rates = data.values[:, 1:].astype(np.float32).T
         error_rates = [error_rate[: -1] for error_rate in data.columns[1:].tolist()]
         test_times = data.values[:, 0].tolist()
@@ -524,7 +527,7 @@ def supplementary_figure_3():
         csv_data = pd.read_csv(case.path)
         GC_xmax_xmin.append(csv_data["GC content"].multiply(100).max() - csv_data["GC content"].multiply(100).min())
 
-    homopolymer_max_len = pd.read_excel(r"./input_data/FigureS3/Homopolymer/homopolymer_length.xlsx").values[1][1:]
+    homopolymer_max_len = pd.read_csv(r"./input_data/FigureS3/Homopolymer/homopolymer_length.csv").values[1][1:]
 
     all_data = sorted(list(zip(file_names, file_sizes, GC_xmax_xmin, homopolymer_max_len)), key=lambda x: x[1])
     sorted_file_names = [data[0] for data in all_data]
@@ -570,18 +573,24 @@ def supplementary_figure_3():
 
 def supplementary_figure_6():
     loc_error_without_sub, loc_error_without_ins, loc_error_without_del, without_errors = [], [], [], []
-    data_path = r"input_data/FigureS6/errors_location_record.xlsx"
-    wb = openpyxl.load_workbook(data_path)
-    ws_without_sub = wb["without_ref_sub"]
-    ws_without_ins = wb["without_ref_ins"]
-    ws_without_del = wb["without_ref_del"]
+    with open(r".\input_data\FigureS6\without_sub.csv", "r", encoding="utf-8") as f_without_sub:
+        csv_reader = csv.reader(f_without_sub)
+        ws_without_sub = [list(map(int, row)) for row in csv_reader]
 
-    for col in range(2, 102):
+    with open(r".\input_data\FigureS6\without_ins.csv", "r", encoding="utf-8") as f_without_ins:
+        csv_reader = csv.reader(f_without_ins)
+        ws_without_ins = [list(map(int, row)) for row in csv_reader]
+
+    with open(r".\input_data\FigureS6\without_del.csv", "r", encoding="utf-8") as f_without_del:
+        csv_reader = csv.reader(f_without_del)
+        ws_without_del = [list(map(int, row)) for row in csv_reader]
+
+    for col in range(0, 100):
         summation_without_sub, summation_without_ins, summation_without_del, no_errors = 0, 0, 0, 0
-        for row in range(2, 407):
-            summation_without_sub += ws_without_sub.cell(row, col).value
-            summation_without_ins += ws_without_ins.cell(row, col).value
-            summation_without_del += ws_without_del.cell(row, col).value
+        for row in range(0, 405):
+            summation_without_sub += ws_without_sub[row][col]
+            summation_without_ins += ws_without_ins[row][col]
+            summation_without_del += ws_without_del[row][col]
         total = summation_without_sub + summation_without_ins + summation_without_del
         if total != 0:
             sub_ratio = (summation_without_sub / total) * 100
@@ -616,10 +625,14 @@ def supplementary_figure_6():
     ax_2.set_ylabel("% Ratio", size=10)
     ax_2.set_xlabel("Base position in oligo", size=10)
 
-    figs5_path = "./generated_figure/FigureS6.svg"
-    plt.savefig(figs5_path)
+    figs6_path = "./generated_figure/FigureS6.svg"
+    plt.savefig(figs6_path)
     plt.show()
 
 
 if __name__ == "__main__":
-    pass
+    figure_2()
+    figure_3_without_subplot_A()
+    supplementary_figure_2()
+    supplementary_figure_3()
+    supplementary_figure_6()
