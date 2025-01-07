@@ -2,6 +2,8 @@
 ___
 ### 1. Goldman.pdf, 1.18 MB : 
 ### &emsp;A research article titled "Towards practical, high-capacity, low-maintenance information storage in synthesized DNA".
+### Note: 
+### The used PDF version is published by Nature, which is under restrict access. Therefore, the file is not included in the repository. Users can download it from the [Nature](https://www.nature.com/articles/nature11875) and put it in the `test_files` directory.
 ### 2. poem.txt, 5.79 KB:
 ### &emsp;Context of four Chinese ancient poems named *Pi Pa Xing*, *Chang He Ge*, *Chang Xiang Si*, and *Ye Yu* respectively.
 ### 3. program.py, 6.94 KB:
