@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name="R_plus",
-    version="0.1.0",
+    version="0.0.1",
     author="Incpink Liu, Zhi Ping",
     author_email="liuderuilin@genomics.cn, liuderuilin22@mails.ucas.ac.cn",
     maintainer="BGI-research",
@@ -17,8 +17,8 @@ setup(
     long_description="R+ is a DNA storage transcoding strategy developed by BGI-research. \n"
                      "Briefly, it can provide a direct mapping refence between expanded molecular alphabet and "
                      "N-nary digits in the absence of high-performance transcoding algorithm at present.\n"
-                     "To know more abour detailed information of the module, "
-                     "please click Github Repository link: https:/github.com/incpink-Liu/DNA-storage-R_plus",
+                     "The detailed information is available in the Github Repository (create a new page to open it): "
+                     "https:/github.com/incpink-Liu/DNA-storage-R_plus",
     packages=["R_plus", "R_plus/utils"],
     classifiers=[
         "Intended Audience :: Science/Research",
