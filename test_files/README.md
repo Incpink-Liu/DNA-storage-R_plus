@@ -7,7 +7,7 @@ ___
 ### 2. poem.txt, 5.79 KB:
 ### &emsp;Context of four Chinese ancient poems named *Pi Pa Xing*, *Chang He Ge*, *Chang Xiang Si*, and *Ye Yu* respectively.
 ### 3. program.py, 6.94 KB:
-### &emsp;A earlier version program for scheme of R+.
+### &emsp;An earlier version program for scheme of R+.
 ### 4. rain.wav, 3.81 MB:
 ### &emsp;A sound file of rain.
 ### 5. speak.mp4, 1.45 MB:
